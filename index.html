@@ -832,20 +832,20 @@
         <div class="form-row">
           <div class="form-field">
             <label>First name</label>
-            <input type="text" placeholder="Jane" required />
+            <input type="text" name="first_name" placeholder="Jane" required />
           </div>
           <div class="form-field">
             <label>Last name</label>
-            <input type="text" placeholder="Smith" required />
+            <input type="text" name="last_name" placeholder="Smith" required />
           </div>
         </div>
         <div class="form-field">
           <label>Work email</label>
-          <input type="email" placeholder="jane@company.com" required />
+          <input type="email" name="email" placeholder="jane@company.com" required />
         </div>
         <div class="form-field">
           <label>Migration type</label>
-          <select>
+          <select name="migration_type">
             <option value="">Select what you need to move…</option>
             <option>Database migration (SQL / NoSQL)</option>
             <option>Legacy system to cloud</option>
@@ -856,7 +856,7 @@
         </div>
         <div class="form-field">
           <label>Tell us more <span style="font-weight:400; color:var(--gray)">(optional)</span></label>
-          <textarea placeholder="Rough data size, current platform, target platform, timeline…"></textarea>
+          <textarea name="message" placeholder="Rough data size, current platform, target platform, timeline…"></textarea>
         </div>
         <button type="submit" class="form-submit">Book My Free Consultation →</button>
       </form>
@@ -906,12 +906,32 @@
     reveals.forEach(r => io.observe(r));
 
     // ── Form submit ──
-    function handleSubmit(e) {
+    async function handleSubmit(e) {
       e.preventDefault();
-      const btn = e.target.querySelector('.form-submit');
-      btn.textContent = '✓ Request received — we\'ll be in touch!';
-      btn.style.background = 'linear-gradient(135deg, #00B8D9, #7B2FBE)';
+      const form = e.target;
+      const btn = form.querySelector('.form-submit');
+      btn.textContent = 'Sending…';
       btn.disabled = true;
+      try {
+        const res = await fetch('https://formspree.io/f/mbdqzebl', {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { Accept: 'application/json' }
+        });
+        if (res.ok) {
+          btn.textContent = '✓ Request received — we\'ll be in touch!';
+          btn.style.background = 'linear-gradient(135deg, #00B8D9, #7B2FBE)';
+          form.reset();
+        } else {
+          btn.textContent = 'Something went wrong — please try again';
+          btn.style.background = 'var(--orange)';
+          btn.disabled = false;
+        }
+      } catch {
+        btn.textContent = 'Something went wrong — please try again';
+        btn.style.background = 'var(--orange)';
+        btn.disabled = false;
+      }
     }
 
     // ── Tweaks ──
